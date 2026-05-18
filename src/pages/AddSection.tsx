@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import Bg from '../assets/add-bg.avif'
-import { FaHome } from 'react-icons/fa'
 import { fetchSections ,addSection,deleteSections} from '../services/section'
 import type { Section } from '../services/section'
 
