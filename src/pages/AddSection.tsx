@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import Bg from '../assets/add-bg.avif'
 import { fetchSections, addSection, deleteSections } from '../services/section'
 import type { Section } from '../services/section'
+import { Plus } from 'lucide-react'
 
 
 
@@ -96,11 +97,11 @@ function AddSection() {
           <p className="text-white/40 text-sm">Name your section, then add content blocks to it.</p>
         </div>
 
-        <div className="bg-white/5 border border-white/8 rounded-2xl p-6 space-y-4">
+        <div className="bg-white/5 border border-white/8 rounded-2xl md:p-6 px-3 space-y-2 py-2">
           <label className="block text-xs font-medium text-white/50 uppercase tracking-widest">
             Section name
           </label>
-          <div className="flex gap-3">
+          <div className="flex md:gap-3 gap-2">
             <input
               type="text"
               value={sectionName}
@@ -112,7 +113,7 @@ function AddSection() {
             <button
               onClick={handleAdd}
               disabled={!sectionName.trim() || mutation.isPending}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-linear-to-br from-amber-900 to-stone-900 text-white text-sm font-medium border border-white/10 hover:brightness-110 hover:scale-[1.02] active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-150 shadow-lg shadow-amber-950/30"
+              className="flex items-center gap-2 md:px-6 px-3 md:py-3 py-1 rounded-xl bg-linear-to-br from-amber-900 to-stone-900 text-white text-sm font-medium border border-white/10 hover:brightness-110 hover:scale-[1.02] active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-150 shadow-lg shadow-amber-950/30"
             >
               {mutation.isPending ? (
                 <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -120,9 +121,7 @@ function AddSection() {
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
                 </svg>
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m-8-8h16" />
-                </svg>
+                <Plus/>
               )}
               {mutation.isPending ? 'Adding…' : 'Add'}
             </button>
