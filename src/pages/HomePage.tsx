@@ -8,13 +8,9 @@ import ImageModal from '../Components/ImageModal';
 import type { Section } from '../services/section';
 import type { ContentItem } from '../services/content';
 import { fetchSectionContents } from '../services/content';
+import { fetchHomepageSections } from '../services/section';
 
 
-
-const fetchHomepageSections = async (): Promise<Section[]> => {
-  const res = await axios.get('http://localhost:8000/homepage-sections');
-  return res.data.data ?? [];
-};
 
 
 

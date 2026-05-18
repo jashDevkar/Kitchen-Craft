@@ -6,31 +6,15 @@ import ImageModal from '../Components/ImageModal';
 import * as Accordion from '@radix-ui/react-accordion';
 import Bg from '../assets/add-bg.avif'
 import { FaChevronDown } from 'react-icons/fa';
+import { fetchSectionContents } from '../services/content';
+import type { ContentItem } from '../services/content';
+import { fetchSections } from '../services/section';
+import type { Section } from '../services/section';
 
-interface Section {
-  id: string;
-  name: string;
-}
 
-interface ContentItem {
-  id: string;
-  _id?: string;
-  imageUrl: string;
-  createdAt: string;
-}
 
-const fetchAllSections = async (): Promise<Section[]> => {
-  const res = await axios.get('http://localhost:8000/sections');
-  return res.data.data ?? [];
-};
 
-const fetchSectionContent = async (sectionName: string): Promise<ContentItem[]> => {
-  const res = await axios.post('http://localhost:8000/content', {
-    sectionName,
-    mode: 'viewall',
-  });
-  return res.data.data ?? [];
-};
+
 
 export default function ViewAll() {
   const navigate = useNavigate();
@@ -40,7 +24,7 @@ export default function ViewAll() {
 
   const { data: sections = [], isLoading: sectionsLoading } = useQuery<Section[]>({
     queryKey: ['all-sections'],
-    queryFn: fetchAllSections,
+    queryFn: fetchSections,
   });
 
   const { data: contentMap = {} } = useQuery({
@@ -49,7 +33,7 @@ export default function ViewAll() {
       const map: Record<string, ContentItem[]> = {};
       await Promise.all(
         sections.map(async (section) => {
-          map[section.name] = await fetchSectionContent(section.name);
+          map[section.name] = await fetchSectionContents(section.name);
         })
       );
       return map;
@@ -127,7 +111,7 @@ export default function ViewAll() {
 
                 return (
                   <Accordion.Item
-                    key={section.id}
+                    key={section._id}
                     value={section.name}
                     className="bg-white/50 rounded-2xl border border-stone-200/50 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
                   >

@@ -17,6 +17,13 @@ export const fetchSections = async (): Promise<Section[]> => {
   }
 };
 
+export const fetchHomepageSections = async (): Promise<Section[]> => {
+  const res = await axios.get('/homepage-sections');
+  return res.data.data ?? [];
+};
+
+
+
 export const addSection = async (name: string): Promise<Section|null> => {
   try {
     const response = await axios.post("/add-section", {
