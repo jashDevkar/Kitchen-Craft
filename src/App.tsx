@@ -1,11 +1,15 @@
 
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
-import ModularKitchenWebsite from './tem'
+import ModularKitchenWebsite from './pages/HomePage'
 
 import AddSection from './pages/AddSection'
 import AddContent from './pages/AddContent'
 import Layout from './pages/Layout'
+import ViewAll from './pages/ViewAll'
+import axios from "axios";
+
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 function App() {
 
@@ -15,7 +19,7 @@ function App() {
       <Routes>
 
         <Route path='/' element={<ModularKitchenWebsite />} />
-
+        <Route path='/view-all' element={<ViewAll />} />
 
         <Route element={<Layout/>}>
 

@@ -1,32 +1,29 @@
 import { useState, useEffect } from 'react';
-import { ChefHat, Award, Users, Sparkles, Star, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import Navbaar from './Components/Navbaar';
+import { ChefHat, Award, Users, Sparkles, Star, ArrowRight, ChevronLeft, ChevronRight,Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import Navbaar from '../Components/Navbaar';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
+import ImageModal from '../Components/ImageModal';
+import type { Section } from '../services/section';
+import type { ContentItem } from '../services/content';
+import { fetchSectionContents } from '../services/content';
 
-interface ApiSection {
-  id: string;
-  name: string;
-}
 
-interface ContentItem {
-  id: string;
-  imageUrl: string;
-}
 
-const fetchHomepageSections = async (): Promise<ApiSection[]> => {
+const fetchHomepageSections = async (): Promise<Section[]> => {
   const res = await axios.get('http://localhost:8000/homepage-sections');
   return res.data.data ?? [];
 };
 
-const fetchSectionContent = async (sectionName: string): Promise<ContentItem[]> => {
-  const res = await axios.post('http://localhost:8000/content', { sectionName });
-  return res.data.data ?? [];
-};
+
 
 export default function ModularKitchenWebsite() {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const heroSlides = [
     { image: 'https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?w=1200', title: 'Luxury Modular Kitchens', subtitle: 'Where Elegance Meets Functionality' },
@@ -34,14 +31,14 @@ export default function ModularKitchenWebsite() {
     { image: 'https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?w=1200', title: 'Timeless Beauty', subtitle: 'Transform Your Cooking Space' },
   ];
 
-  const { data: sections = [] } = useQuery<ApiSection[]>({
+  const { data: sections = [] } = useQuery<Section[]>({
     queryKey: ['homepage-sections'],
     queryFn: fetchHomepageSections,
   });
 
   const { data: sectionContent = [], isLoading: contentLoading } = useQuery<ContentItem[]>({
     queryKey: ['section-content', activeSection],
-    queryFn: () => fetchSectionContent(activeSection!),
+    queryFn: () => fetchSectionContents(activeSection!,"homepage"),
     enabled: !!activeSection,
   });
 
@@ -61,6 +58,11 @@ export default function ModularKitchenWebsite() {
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
 
+  const openImageModal = (index: number) => {
+    setSelectedImageIndex(index);
+    setIsModalOpen(true);
+  };
+
   const reviews = [
     { id: 1, name: 'Priya Sharma', rating: 5, text: 'Absolutely stunning work! They transformed our kitchen into a dream space. Professional, timely, and attention to detail is exceptional.', location: 'Mumbai' },
     { id: 2, name: 'Rajesh Kumar', rating: 5, text: 'Best decision we made for our home. The modular kitchen is not only beautiful but also highly functional. Highly recommend!', location: 'Delhi' },
@@ -68,11 +70,11 @@ export default function ModularKitchenWebsite() {
   ];
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="relative min-h-screen bg-stone-50">
       <Navbaar />
 
       {/* Hero Carousel */}
-      <section id="home" className="relative h-screen overflow-hidden">
+      <section id="home" className="relative h-[65vh] overflow-hidden">
         {heroSlides.map((slide, index) => (
           <div key={index} className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
             <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
@@ -86,7 +88,9 @@ export default function ModularKitchenWebsite() {
               <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white leading-tight">{heroSlides[currentSlide].title}</h1>
               <p className="text-xl md:text-2xl text-amber-100 mb-8 leading-relaxed">{heroSlides[currentSlide].subtitle}</p>
               <div className="flex flex-wrap gap-4">
-                <button className="bg-linear-to-r from-amber-700 to-amber-900 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 inline-flex items-center space-x-2">
+                <button
+                  onClick={() => navigate('/view-all')}
+                  className="bg-linear-to-r from-amber-700 to-amber-900 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 inline-flex items-center space-x-2">
                   <span>Explore Portfolio</span>
                   <ArrowRight className="h-5 w-5" />
                 </button>
@@ -115,17 +119,18 @@ export default function ModularKitchenWebsite() {
       {/* Stats */}
       <section className="py-20 px-4 bg-primary">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
               { icon: Award, value: '500+', label: 'Projects Completed' },
               { icon: Users, value: '450+', label: 'Happy Clients' },
               { icon: Sparkles, value: '15+', label: 'Years Experience' },
+              { icon: Clock, value: '30 Days', label: 'Avg. Completion Time' },
             ].map(({ icon: Icon, value, label }) => (
               <div key={label} className="text-center group">
                 <div className="inline-block bg-amber-700/30 backdrop-blur-sm p-6 rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Icon className="h-12 w-12 text-amber-300 mx-auto" />
                 </div>
-                <h3 className="text-5xl font-bold text-white mb-2">{value}</h3>
+                <h3 className="text-2xl font-bold text-white mb-2">{value}</h3>
                 <p className="text-amber-200 text-lg">{label}</p>
               </div>
             ))}
@@ -147,7 +152,7 @@ export default function ModularKitchenWebsite() {
             <div className="flex flex-wrap justify-center gap-4 mb-12">
               {sections.map((section) => (
                 <button
-                  key={section.id}
+                  key={section._id}
                   onClick={() => setActiveSection(section.name)}
                   className={`px-8 py-3 rounded-lg font-semibold transition-all duration-300 capitalize ${
                     activeSection === section.name
@@ -171,19 +176,34 @@ export default function ModularKitchenWebsite() {
           ) : sectionContent.length === 0 ? (
             <div className="text-center py-20 text-stone-400 text-lg">No content available for this section.</div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-              {sectionContent.map((item) => (
-                <div key={item.id} className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
-                  <img src={item.imageUrl} alt={activeSection ?? ''} className="w-full lg:h-80 h-40 object-cover group-hover:scale-110 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-linear-to-t from-amber-900/90 via-amber-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
-                    <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                      <h3 className="text-white text-2xl font-bold mb-2 capitalize">{activeSection}</h3>
-                      <div className="w-16 h-1 bg-amber-400" />
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 mb-8">
+                {sectionContent.map((item, index) => (
+                  <button
+                    key={item._id}
+                    onClick={() => openImageModal(index)}
+                    className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
+                  >
+                    <img src={item.imageUrl} alt={activeSection ?? ''} className="w-full lg:h-80 h-40 object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-linear-to-t from-amber-900/90 via-amber-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
+                      <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                        <h3 className="text-white text-2xl font-bold mb-2 capitalize">{activeSection}</h3>
+                        <div className="w-16 h-1 bg-amber-400" />
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  </button>
+                ))}
+              </div>
+              <div className="text-center">
+                <button
+                  onClick={() => navigate('/view-all')}
+                  className="bg-linear-to-r from-amber-700 to-amber-900 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 inline-flex items-center gap-2"
+                >
+                  <span>View All</span>
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              </div>
+            </>
           )}
         </div>
       </section>
@@ -247,6 +267,13 @@ export default function ModularKitchenWebsite() {
           </div>
         </div>
       </footer>
+
+      <ImageModal
+        isOpen={isModalOpen}
+        images={sectionContent.map(item => item.imageUrl)}
+        initialIndex={selectedImageIndex ?? 0}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import Bg from '../assets/add-bg.avif'
-import { fetchSections ,addSection,deleteSections} from '../services/section'
+import { fetchSections, addSection, deleteSections } from '../services/section'
 import type { Section } from '../services/section'
 
 
@@ -24,14 +24,16 @@ function AddSection() {
     queryFn: fetchSections,
   })
 
-  
+
 
   const mutation = useMutation({
     mutationFn: (name: string) => addSection(name),
     onSuccess: (newSection) => {
-      queryClient.setQueryData<Section[]>(['sections'], (old = []) => [...old, newSection])
-      setAddedId(newSection._id)
-      setSectionName('')
+      queryClient.invalidateQueries({ queryKey: ['sections'] })
+      if (newSection) {
+
+        setAddedId(newSection._id);
+      }
     },
   })
 
@@ -201,8 +203,8 @@ function AddSection() {
                       ${selectedIds.includes(section._id)
                         ? 'border-red-800/50 bg-red-950/20'
                         : addedId === section._id
-                        ? 'border-amber-800/40 bg-amber-950/20'
-                        : 'border-white/6 bg-white/7 hover:border-white/12 hover:bg-white/5'}
+                          ? 'border-amber-800/40 bg-amber-950/20'
+                          : 'border-white/6 bg-white/7 hover:border-white/12 hover:bg-white/5'}
                     `}
                   >
                     <div className="flex items-center gap-3">
